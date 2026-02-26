@@ -309,6 +309,74 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+  }
+
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .footer-desc {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 420px;
+  }
+
+  .footer-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .footer-links a {
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .footer-links a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .footer-divider {
+    color: var(--border);
+    font-size: 14px;
+  }
+
+  .footer-credit {
+    color: var(--text-secondary);
+  }
+
+  .footer-credit a {
+    color: var(--text-secondary);
+    border-color: transparent;
+  }
+
+  .footer-credit a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    footer { padding: 32px 20px; }
+    .footer-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+  }
+
   @media (max-width: 640px) {
     header { padding: 32px 20px 24px; }
     main { padding: 24px 20px 60px; }
@@ -344,6 +412,17 @@
 </main>
 
 <div class="toast" id="toast">Copied!</div>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-desc">A quick reference for designers who need world currency symbols — just hover and copy as text or SVG, right into your workflow.</p>
+    <div class="footer-links">
+      <a href="https://istiko.me/" target="_blank" rel="noopener">istiko.me</a>
+      <span class="footer-divider">·</span>
+      <span class="footer-credit">Created with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a></span>
+    </div>
+  </div>
+</footer>
 
 <script>
 const currencies = [
@@ -496,10 +575,10 @@ function renderGrid() {
       </div>
       <div class="copy-actions">
         <button class="copy-btn" title="Copy symbol as text" onclick="copySymbol(event, '${c.symbol.replace(/'/g,"\\'")}')">
-          <span class="btn-label">txt</span>
+          <span class="btn-icon">T</span><span class="btn-label">txt</span>
         </button>
         <button class="copy-btn" title="Copy symbol as SVG" onclick="copySVG(event, '${c.symbol.replace(/'/g,"\\'").replace(/&/g,'&amp;')}', '${c.name.replace(/'/g,"\\'")}')">
-          <span class="btn-label">svg</span>
+          <span class="btn-icon">◻</span><span class="btn-label">svg</span>
         </button>
       </div>
     </div>
