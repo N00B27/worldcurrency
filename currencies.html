@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Currencies</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;1,9..144,200&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --card: #FFFFFF;
+    --text-primary: #1A1A18;
+    --text-secondary: #7A7870;
+    --accent: #2D4A3E;
+    --border: #E8E5DF;
+    --symbol-color: #1A1A18;
+    --tag-bg: #EEF0EB;
+  }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* Header */
+  header {
+    padding: 60px 48px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 200;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .count-badge {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: var(--tag-bg);
+    padding: 6px 12px;
+    border-radius: 2px;
+  }
+
+  /* Search + Filter */
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 340px;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.35;
+  }
+
+  input[type="search"] {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 9px 12px 9px 36px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="search"]:focus {
+    border-color: var(--accent);
+  }
+
+  input[type="search"]::placeholder { color: var(--text-secondary); }
+
+  .filters {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .filter-btn:hover { color: var(--text-primary); border-color: var(--text-primary); }
+  .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Grid */
+  main {
+    padding: 40px 48px 80px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .card {
+    background: var(--card);
+    padding: 28px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    cursor: default;
+    transition: background 0.15s;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.4s ease both;
+  }
+
+  .card:hover {
+    background: #FDFCFA;
+    z-index: 2;
+  }
+
+  .card:hover .symbol {
+    transform: scale(1.05);
+    color: var(--accent);
+  }
+
+  .card:hover .copy-btn { opacity: 1; }
+
+  .symbol {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    font-weight: 200;
+    line-height: 1;
+    color: var(--symbol-color);
+    transition: transform 0.2s, color 0.2s;
+    user-select: none;
+    letter-spacing: -0.02em;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+  }
+
+  .currency-name {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .currency-code {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .currency-country {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--tag-bg);
+    color: var(--text-secondary);
+    padding: 3px 6px;
+    border-radius: 2px;
+    width: fit-content;
+    margin-top: 4px;
+  }
+
+  .tag.crypto { background: #EEF4FF; color: #4466CC; }
+  .tag.historical { background: #FFF4EE; color: #AA6644; }
+  .tag.major { background: #EEFAF4; color: #2D7A5E; }
+
+  .copy-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .card:hover .copy-actions { opacity: 1; }
+
+  .copy-btn {
+    background: var(--tag-bg);
+    border: none;
+    border-radius: 2px;
+    padding: 4px 7px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+  }
+
+  .copy-btn:hover { background: var(--accent); color: white; }
+  .copy-btn.copied { background: var(--accent); color: white; }
+
+  .copy-btn .btn-label { font-size: 9px; }
+  .copy-btn .btn-icon { font-size: 10px; line-height: 1; }
+
+  /* No results */
+  .no-results {
+    grid-column: 1/-1;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+    background: var(--card);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border-radius: 2px;
+    opacity: 0;
+    transition: all 0.25s;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 32px 20px 24px; }
+    main { padding: 24px 20px 60px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>World <em>Currencies</em></h1>
+    <span class="count-badge" id="count-badge">— currencies</span>
+  </div>
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="search" id="search" placeholder="Search currency, code…">
+    </div>
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="major">Major</button>
+      <button class="filter-btn" data-filter="crypto">Crypto</button>
+      <button class="filter-btn" data-filter="historical">Historical</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+const currencies = [
+  // Major
+  { symbol: '$', name: 'US Dollar', code: 'USD', country: 'United States', tag: 'major' },
+  { symbol: '€', name: 'Euro', code: 'EUR', country: 'Eurozone', tag: 'major' },
+  { symbol: '£', name: 'Pound Sterling', code: 'GBP', country: 'United Kingdom', tag: 'major' },
+  { symbol: '¥', name: 'Japanese Yen', code: 'JPY', country: 'Japan', tag: 'major' },
+  { symbol: '¥', name: 'Chinese Yuan', code: 'CNY', country: 'China', tag: 'major' },
+  { symbol: '₹', name: 'Indian Rupee', code: 'INR', country: 'India', tag: 'major' },
+  { symbol: 'C$', name: 'Canadian Dollar', code: 'CAD', country: 'Canada', tag: 'major' },
+  { symbol: 'A$', name: 'Australian Dollar', code: 'AUD', country: 'Australia', tag: 'major' },
+  { symbol: 'CHF', name: 'Swiss Franc', code: 'CHF', country: 'Switzerland', tag: 'major' },
+  { symbol: 'kr', name: 'Swedish Krona', code: 'SEK', country: 'Sweden', tag: null },
+  { symbol: 'kr', name: 'Norwegian Krone', code: 'NOK', country: 'Norway', tag: null },
+  { symbol: 'kr', name: 'Danish Krone', code: 'DKK', country: 'Denmark', tag: null },
+  { symbol: 'R', name: 'South African Rand', code: 'ZAR', country: 'South Africa', tag: null },
+  { symbol: 'R$', name: 'Brazilian Real', code: 'BRL', country: 'Brazil', tag: null },
+  { symbol: '₩', name: 'South Korean Won', code: 'KRW', country: 'South Korea', tag: null },
+  { symbol: 'S$', name: 'Singapore Dollar', code: 'SGD', country: 'Singapore', tag: null },
+  { symbol: 'HK$', name: 'Hong Kong Dollar', code: 'HKD', country: 'Hong Kong', tag: null },
+  // Rupee family
+  { symbol: '₨', name: 'Pakistani Rupee', code: 'PKR', country: 'Pakistan', tag: null },
+  { symbol: '₨', name: 'Nepalese Rupee', code: 'NPR', country: 'Nepal', tag: null },
+  { symbol: '₨', name: 'Sri Lankan Rupee', code: 'LKR', country: 'Sri Lanka', tag: null },
+  { symbol: '৳', name: 'Bangladeshi Taka', code: 'BDT', country: 'Bangladesh', tag: null },
+  // Middle East
+  { symbol: '﷼', name: 'Saudi Riyal', code: 'SAR', country: 'Saudi Arabia', tag: null },
+  { symbol: 'د.إ', name: 'UAE Dirham', code: 'AED', country: 'UAE', tag: null },
+  { symbol: '₪', name: 'Israeli Shekel', code: 'ILS', country: 'Israel', tag: null },
+  { symbol: '﷼', name: 'Iranian Rial', code: 'IRR', country: 'Iran', tag: null },
+  { symbol: '﷼', name: 'Omani Rial', code: 'OMR', country: 'Oman', tag: null },
+  { symbol: '﷼', name: 'Qatari Riyal', code: 'QAR', country: 'Qatar', tag: null },
+  { symbol: 'د.ك', name: 'Kuwaiti Dinar', code: 'KWD', country: 'Kuwait', tag: null },
+  { symbol: '.د.ب', name: 'Bahraini Dinar', code: 'BHD', country: 'Bahrain', tag: null },
+  { symbol: 'د.م.', name: 'Moroccan Dirham', code: 'MAD', country: 'Morocco', tag: null },
+  // Africa
+  { symbol: '₦', name: 'Nigerian Naira', code: 'NGN', country: 'Nigeria', tag: null },
+  { symbol: 'KSh', name: 'Kenyan Shilling', code: 'KES', country: 'Kenya', tag: null },
+  { symbol: 'GH₵', name: 'Ghanaian Cedi', code: 'GHS', country: 'Ghana', tag: null },
+  { symbol: 'TSh', name: 'Tanzanian Shilling', code: 'TZS', country: 'Tanzania', tag: null },
+  { symbol: 'USh', name: 'Ugandan Shilling', code: 'UGX', country: 'Uganda', tag: null },
+  { symbol: 'ETB', name: 'Ethiopian Birr', code: 'ETB', country: 'Ethiopia', tag: null },
+  // Europe
+  { symbol: '₽', name: 'Russian Ruble', code: 'RUB', country: 'Russia', tag: null },
+  { symbol: '₺', name: 'Turkish Lira', code: 'TRY', country: 'Turkey', tag: null },
+  { symbol: '₴', name: 'Ukrainian Hryvnia', code: 'UAH', country: 'Ukraine', tag: null },
+  { symbol: 'zł', name: 'Polish Złoty', code: 'PLN', country: 'Poland', tag: null },
+  { symbol: 'Kč', name: 'Czech Koruna', code: 'CZK', country: 'Czech Republic', tag: null },
+  { symbol: 'Ft', name: 'Hungarian Forint', code: 'HUF', country: 'Hungary', tag: null },
+  { symbol: 'lei', name: 'Romanian Leu', code: 'RON', country: 'Romania', tag: null },
+  { symbol: 'лв', name: 'Bulgarian Lev', code: 'BGN', country: 'Bulgaria', tag: null },
+  { symbol: 'kn', name: 'Croatian Kuna', code: 'HRK', country: 'Croatia', tag: 'historical' },
+  { symbol: 'Lek', name: 'Albanian Lek', code: 'ALL', country: 'Albania', tag: null },
+  { symbol: 'den', name: 'Macedonian Denar', code: 'MKD', country: 'N. Macedonia', tag: null },
+  { symbol: 'KM', name: 'Bosnian Mark', code: 'BAM', country: 'Bosnia & Herzegovina', tag: null },
+  { symbol: '₾', name: 'Georgian Lari', code: 'GEL', country: 'Georgia', tag: null },
+  { symbol: '₼', name: 'Azerbaijani Manat', code: 'AZN', country: 'Azerbaijan', tag: null },
+  { symbol: '֏', name: 'Armenian Dram', code: 'AMD', country: 'Armenia', tag: null },
+  { symbol: 'T', name: 'Turkmenistani Manat', code: 'TMT', country: 'Turkmenistan', tag: null },
+  { symbol: '₸', name: 'Kazakhstani Tenge', code: 'KZT', country: 'Kazakhstan', tag: null },
+  { symbol: 'с', name: 'Kyrgyzstani Som', code: 'KGS', country: 'Kyrgyzstan', tag: null },
+  { symbol: 'SM', name: 'Tajikistani Somoni', code: 'TJS', country: 'Tajikistan', tag: null },
+  // Southeast Asia
+  { symbol: '฿', name: 'Thai Baht', code: 'THB', country: 'Thailand', tag: null },
+  { symbol: '₫', name: 'Vietnamese Đồng', code: 'VND', country: 'Vietnam', tag: null },
+  { symbol: '₱', name: 'Philippine Peso', code: 'PHP', country: 'Philippines', tag: null },
+  { symbol: 'Rp', name: 'Indonesian Rupiah', code: 'IDR', country: 'Indonesia', tag: null },
+  { symbol: 'RM', name: 'Malaysian Ringgit', code: 'MYR', country: 'Malaysia', tag: null },
+  { symbol: '₭', name: 'Lao Kip', code: 'LAK', country: 'Laos', tag: null },
+  { symbol: 'K', name: 'Myanmar Kyat', code: 'MMK', country: 'Myanmar', tag: null },
+  { symbol: '₮', name: 'Mongolian Tögrög', code: 'MNT', country: 'Mongolia', tag: null },
+  { symbol: '៛', name: 'Cambodian Riel', code: 'KHR', country: 'Cambodia', tag: null },
+  // Latin America
+  { symbol: '$', name: 'Mexican Peso', code: 'MXN', country: 'Mexico', tag: null },
+  { symbol: '$', name: 'Chilean Peso', code: 'CLP', country: 'Chile', tag: null },
+  { symbol: '$', name: 'Colombian Peso', code: 'COP', country: 'Colombia', tag: null },
+  { symbol: '$', name: 'Argentine Peso', code: 'ARS', country: 'Argentina', tag: null },
+  { symbol: 'S/', name: 'Peruvian Sol', code: 'PEN', country: 'Peru', tag: null },
+  { symbol: 'Bs.', name: 'Bolivian Boliviano', code: 'BOB', country: 'Bolivia', tag: null },
+  { symbol: '₲', name: 'Paraguayan Guaraní', code: 'PYG', country: 'Paraguay', tag: null },
+  { symbol: '$U', name: 'Uruguayan Peso', code: 'UYU', country: 'Uruguay', tag: null },
+  { symbol: '₡', name: 'Costa Rican Colón', code: 'CRC', country: 'Costa Rica', tag: null },
+  { symbol: 'Q', name: 'Guatemalan Quetzal', code: 'GTQ', country: 'Guatemala', tag: null },
+  { symbol: 'L', name: 'Honduran Lempira', code: 'HNL', country: 'Honduras', tag: null },
+  { symbol: 'C$', name: 'Nicaraguan Córdoba', code: 'NIO', country: 'Nicaragua', tag: null },
+  { symbol: 'B/.', name: 'Panamanian Balboa', code: 'PAB', country: 'Panama', tag: null },
+  { symbol: 'J$', name: 'Jamaican Dollar', code: 'JMD', country: 'Jamaica', tag: null },
+  { symbol: 'TT$', name: 'T&T Dollar', code: 'TTD', country: 'Trinidad & Tobago', tag: null },
+  { symbol: 'RD$', name: 'Dominican Peso', code: 'DOP', country: 'Dominican Republic', tag: null },
+  // Pacific / Oceania
+  { symbol: 'NZ$', name: 'New Zealand Dollar', code: 'NZD', country: 'New Zealand', tag: null },
+  { symbol: 'FJ$', name: 'Fijian Dollar', code: 'FJD', country: 'Fiji', tag: null },
+  { symbol: 'WST', name: 'Samoan Tālā', code: 'WST', country: 'Samoa', tag: null },
+  // Historical
+  { symbol: '₠', name: 'Europ. Currency Unit', code: 'XEU', country: 'Europe', tag: 'historical' },
+  { symbol: '₣', name: 'French Franc', code: 'FRF', country: 'France', tag: 'historical' },
+  { symbol: '₤', name: 'Italian Lira', code: 'ITL', country: 'Italy', tag: 'historical' },
+  { symbol: '₧', name: 'Spanish Peseta', code: 'ESP', country: 'Spain', tag: 'historical' },
+  { symbol: '₯', name: 'Greek Drachma', code: 'GRD', country: 'Greece', tag: 'historical' },
+  { symbol: '₢', name: 'Brazilian Cruzeiro', code: 'BRC', country: 'Brazil', tag: 'historical' },
+  { symbol: 'DM', name: 'Deutsche Mark', code: 'DEM', country: 'Germany', tag: 'historical' },
+  { symbol: '₥', name: 'Mill', code: '—', country: 'USA (historical)', tag: 'historical' },
+  // Crypto
+  { symbol: '₿', name: 'Bitcoin', code: 'BTC', country: 'Decentralized', tag: 'crypto' },
+  { symbol: 'Ξ', name: 'Ethereum', code: 'ETH', country: 'Decentralized', tag: 'crypto' },
+  { symbol: 'Ł', name: 'Litecoin', code: 'LTC', country: 'Decentralized', tag: 'crypto' },
+  { symbol: '₳', name: 'Cardano', code: 'ADA', country: 'Decentralized', tag: 'crypto' },
+  { symbol: 'Ð', name: 'Dogecoin', code: 'DOGE', country: 'Decentralized', tag: 'crypto' },
+  { symbol: 'XRP', name: 'Ripple', code: 'XRP', country: 'Decentralized', tag: 'crypto' },
+];
+
+let activeFilter = 'all';
+let searchQuery = '';
+
+function tagLabel(tag) {
+  if (!tag) return '';
+  return `<span class="tag ${tag}">${tag}</span>`;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  let filtered = currencies.filter(c => {
+    if (activeFilter !== 'all' && c.tag !== activeFilter) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return c.name.toLowerCase().includes(q) ||
+             c.code.toLowerCase().includes(q) ||
+             c.symbol.toLowerCase().includes(q) ||
+             c.country.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  document.getElementById('count-badge').textContent = `${filtered.length} currencies`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="no-results">No currencies found for "<em>${searchQuery}</em>"</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((c, i) => `
+    <div class="card" style="animation-delay:${Math.min(i * 0.015, 0.5)}s">
+      <div class="symbol">${c.symbol}</div>
+      <div class="card-body">
+        <div class="currency-name">${c.name}</div>
+        <div class="currency-code">${c.code}</div>
+        <div class="currency-country">${c.country}</div>
+        ${tagLabel(c.tag)}
+      </div>
+      <div class="copy-actions">
+        <button class="copy-btn" title="Copy symbol as text" onclick="copySymbol(event, '${c.symbol.replace(/'/g,"\\'")}')">
+          <span class="btn-label">txt</span>
+        </button>
+        <button class="copy-btn" title="Copy symbol as SVG" onclick="copySVG(event, '${c.symbol.replace(/'/g,"\\'").replace(/&/g,'&amp;')}', '${c.name.replace(/'/g,"\\'")}')">
+          <span class="btn-label">svg</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function copySymbol(e, symbol) {
+  navigator.clipboard.writeText(symbol).then(() => {
+    const btn = e.currentTarget;
+    const label = btn.querySelector('.btn-label');
+    label.textContent = '✓';
+    btn.classList.add('copied');
+    showToast(`Copied  ${symbol}`);
+    setTimeout(() => { label.textContent = 'txt'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function copySVG(e, symbol, name) {
+  // Escape XML special chars
+  const safe = symbol.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // Determine font size based on symbol length
+  const fs = symbol.length <= 2 ? 64 : symbol.length <= 4 ? 48 : 38;
+  const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;1,9..144,200');
+      text { font-family: 'Fraunces', Georgia, serif; font-weight: 200; }
+    </style>
+  </defs>
+  <rect width="120" height="120" fill="#ffffff"/>
+  <text x="60" y="75" font-size="${fs}" text-anchor="middle" dominant-baseline="middle" fill="#1A1A18">${safe}</text>
+</svg>`;
+
+  navigator.clipboard.writeText(svgStr).then(() => {
+    const btn = e.currentTarget;
+    const label = btn.querySelector('.btn-label');
+    label.textContent = '✓';
+    btn.classList.add('copied');
+    showToast(`SVG copied — ${name}`);
+    setTimeout(() => { label.textContent = 'svg'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  renderGrid();
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderGrid();
+  });
+});
+
+renderGrid();
+</script>
+</body>
+</html>
