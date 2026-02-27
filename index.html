@@ -575,10 +575,10 @@ function renderGrid() {
       </div>
       <div class="copy-actions">
         <button class="copy-btn" title="Copy symbol as text" onclick="copySymbol(event, '${c.symbol.replace(/'/g,"\\'")}')">
-          <span class="btn-icon">T</span><span class="btn-label">txt</span>
+          <span class="btn-label">txt</span>
         </button>
         <button class="copy-btn" title="Copy symbol as SVG" onclick="copySVG(event, '${c.symbol.replace(/'/g,"\\'").replace(/&/g,'&amp;')}', '${c.name.replace(/'/g,"\\'")}')">
-          <span class="btn-icon">◻</span><span class="btn-label">svg</span>
+        <span class="btn-label">svg</span>
         </button>
       </div>
     </div>
